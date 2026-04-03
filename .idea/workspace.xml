@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9758cdd2-6292-4601-a436-8b2739eed2c8" name="更改" comment="更新。">
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/USB串口调试使用指南.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/硬件采购清单-精简版.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/网络配置功能说明.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/需求说明-整体需求.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/需求说明-硬件主控需求.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/需求说明-硬件分控1需求.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/需求说明-硬件分控2需求.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/需求说明-软件系统需求.md" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <excluded-from-favorite>
+      <branch-storage>
+        <map>
+          <entry type="LOCAL">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="main" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </excluded-from-favorite>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;choisaaaaa&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/choisaaaaa/IoT_Smart_Home_Control_System.git&quot;,
+    &quot;accountId&quot;: &quot;95a26710-cbfb-4867-85af-dfc447d5a53c&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="3Bql5ihZC2XBOl14bKlVjZozqaj" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "D:/IoT_Smart_Home_Control_System",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "stardust.markdown.MarkdownSplitEditorSuppressor:keyList": []
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-PY-252.27397.106" />
+        <option value="bundled-python-sdk-4e2b1448bda8-9a97661f3031-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.27397.106" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="9758cdd2-6292-4601-a436-8b2739eed2c8" name="更改" comment="" />
+      <created>1775224299453</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1775224299453</updated>
+      <workItem from="1775224300563" duration="1076000" />
+      <workItem from="1775226501505" duration="3616000" />
+    </task>
+    <task id="LOCAL-00001" summary="更新。">
+      <option name="closed" value="true" />
+      <created>1775226431052</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1775226431052</updated>
+    </task>
+    <task id="LOCAL-00002" summary="更新。">
+      <option name="closed" value="true" />
+      <created>1775226608285</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1775226608285</updated>
+    </task>
+    <task id="LOCAL-00003" summary="更新。">
+      <option name="closed" value="true" />
+      <created>1775226647502</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1775226647502</updated>
+    </task>
+    <task id="LOCAL-00004" summary="更新。">
+      <option name="closed" value="true" />
+      <created>1775226676036</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1775226676036</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="更新。" />
+    <option name="LAST_COMMIT_MESSAGE" value="更新。" />
+  </component>
+</project>
