@@ -27,6 +27,7 @@
     "noImplicitReturns": false,
     "noFallthroughCasesInSwitch": false,
     "baseUrl": ".",
+    "typeRoots": ["./node_modules/@types"],
     "paths": {
       "@/*": ["src/*"],
       "@config/*": ["src/config/*"],

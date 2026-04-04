@@ -3,7 +3,7 @@ import { successResponse } from '../../types';
 
 const router = Router();
 
-router.get('/', (req: Request, res: Response) => {
+router.get('/', (_req: Request, res: Response) => {
   res.json(successResponse({
     devices: '/api/v1/devices',
     users: '/api/v1/users',
