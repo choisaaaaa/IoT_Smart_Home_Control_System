@@ -1,0 +1,122 @@
+import pool, { RowDataPacket, ResultSetHeader } from '../config/database';
+import logger from '../utils/logger';
+import { v4 as uuidv4 } from 'uuid';
+
+export interface Payment extends RowDataPacket {
+  id: number;
+  payment_no: string;
+  order_type: string;
+  order_id: number;
+  amount: number;
+  payment_method: string;
+  status: string;
+  transaction_no: string;
+  paid_at: Date;
+  description: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface PaymentListResponse {
+  list: Payment[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export class PaymentService {
+  static async getPayments(params: {
+    page?: number;
+    pageSize?: number;
+    status?: string;
+    order_type?: string;
+  }): Promise<PaymentListResponse> {
+    try {
+      const { page = 1, pageSize = 10, status, order_type } = params;
+      const offset = (Number(page) - 1) * Number(pageSize);
+      
+      let whereClause = 'WHERE 1=1';
+      const paramsArray: any[] = [];
+      
+      if (status) {
+        whereClause += ' AND status = ?';
+        paramsArray.push(status);
+      }
+      
+      if (order_type) {
+        whereClause += ' AND order_type = ?';
+        paramsArray.push(order_type);
+      }
+      
+      const [totalRows] = await pool.query<RowDataPacket[]>(`SELECT COUNT(*) as total FROM payments ${whereClause}`, paramsArray);
+      const total = (totalRows[0] as any).total;
+      
+      const [rows] = await pool.query<RowDataPacket[]>(
+        `SELECT * FROM payments ${whereClause} ORDER BY id DESC LIMIT ? OFFSET ?`,
+        [...paramsArray, Number(pageSize), offset]
+      );
+      
+      return {
+        list: rows as Payment[],
+        total,
+        page: Number(page),
+        pageSize: Number(pageSize),
+        totalPages: Math.ceil(total / Number(pageSize))
+      };
+    } catch (error) {
+      logger.error('获取支付列表失败:', error);
+      throw new Error('获取支付列表失败');
+    }
+  }
+
+  static async getPaymentById(id: number): Promise<Payment | null> {
+    try {
+      const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM payments WHERE id = ?', [id]);
+      return (rows[0] as Payment) || null;
+    } catch (error) {
+      logger.error('获取支付详情失败:', error);
+      throw new Error('获取支付详情失败');
+    }
+  }
+
+  static async createPayment(data: {
+    order_type: string;
+    order_id: number;
+    amount: number;
+    payment_method: string;
+    description: string;
+  }): Promise<{ id: number; payment_no: string }> {
+    try {
+      const { order_type, order_id, amount, payment_method, description } = data;
+      
+      const paymentNo = `PAY${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}${uuidv4().slice(0, 8).toUpperCase()}`;
+      
+      const [result] = await pool.query<ResultSetHeader>(
+        'INSERT INTO payments (payment_no, order_type, order_id, amount, payment_method, status, description) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [paymentNo, order_type, order_id, amount, payment_method, 'pending', description]
+      );
+      
+      return {
+        id: result.insertId,
+        payment_no: paymentNo
+      };
+    } catch (error) {
+      logger.error('创建支付订单失败:', error);
+      throw new Error('创建支付订单失败');
+    }
+  }
+
+  static async payPayment(id: number, transaction_no: string): Promise<boolean> {
+    try {
+      const [result] = await pool.query<ResultSetHeader>(
+        'UPDATE payments SET status = ?, transaction_no = ?, paid_at = CURRENT_TIMESTAMP WHERE id = ?',
+        ['paid', transaction_no, id]
+      );
+      return result.affectedRows > 0;
+    } catch (error) {
+      logger.error('支付失败:', error);
+      throw new Error('支付失败');
+    }
+  }
+}

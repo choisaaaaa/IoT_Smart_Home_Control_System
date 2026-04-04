@@ -1,0 +1,190 @@
+import pool, { RowDataPacket, ResultSetHeader } from '../config/database';
+import logger from '../utils/logger';
+import { v4 as uuidv4 } from 'uuid';
+
+export interface Booking extends RowDataPacket {
+  id: number;
+  booking_number: string;
+  room_id: number;
+  guest_name: string;
+  guest_phone: string;
+  guest_id_number: string;
+  check_in_date: Date;
+  check_out_date: Date;
+  guest_count: number;
+  special_requests: string;
+  payment_method: string;
+  total_price: number;
+  deposit: number;
+  status: string;
+  created_at: Date;
+  updated_at: Date;
+  check_in_time: Date;
+  check_out_time: Date;
+  cancelled_at: Date;
+  room_number?: string;
+  room_type?: string;
+}
+
+export interface BookingListResponse {
+  list: Booking[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export class BookingService {
+  static async getBookings(params: {
+    page?: number;
+    pageSize?: number;
+    status?: string;
+    guest_name?: string;
+  }): Promise<BookingListResponse> {
+    try {
+      const { page = 1, pageSize = 10, status, guest_name } = params;
+      const offset = (Number(page) - 1) * Number(pageSize);
+      
+      let whereClause = 'WHERE 1=1';
+      const paramsArray: any[] = [];
+      
+      if (status) {
+        whereClause += ' AND b.status = ?';
+        paramsArray.push(status);
+      }
+      
+      if (guest_name) {
+        whereClause += ' AND b.guest_name LIKE ?';
+        paramsArray.push(`%${guest_name}%`);
+      }
+      
+      const [totalRows] = await pool.query<RowDataPacket[]>(`SELECT COUNT(*) as total FROM bookings b ${whereClause}`, paramsArray);
+      const total = (totalRows[0] as any).total;
+      
+      const [rows] = await pool.query<RowDataPacket[]>(
+        `SELECT b.*, r.room_number, r.room_type FROM bookings b LEFT JOIN rooms r ON b.room_id = r.id ${whereClause} ORDER BY b.id DESC LIMIT ? OFFSET ?`,
+        [...paramsArray, Number(pageSize), offset]
+      );
+      
+      return {
+        list: rows as Booking[],
+        total,
+        page: Number(page),
+        pageSize: Number(pageSize),
+        totalPages: Math.ceil(total / Number(pageSize))
+      };
+    } catch (error) {
+      logger.error('获取预订列表失败:', error);
+      throw new Error('获取预订列表失败');
+    }
+  }
+
+  static async getBookingById(id: number): Promise<Booking | null> {
+    try {
+      const [rows] = await pool.query<RowDataPacket[]>(
+        'SELECT b.*, r.room_number, r.room_type FROM bookings b LEFT JOIN rooms r ON b.room_id = r.id WHERE b.id = ?',
+        [id]
+      );
+      return (rows[0] as Booking) || null;
+    } catch (error) {
+      logger.error('获取预订详情失败:', error);
+      throw new Error('获取预订详情失败');
+    }
+  }
+
+  static async createBooking(data: {
+    room_id: number;
+    guest_name: string;
+    guest_phone: string;
+    guest_id_number: string;
+    check_in_date: string;
+    check_out_date: string;
+    guest_count: number;
+    special_requests: string;
+    payment_method: string;
+  }): Promise<{ id: number; booking_number: string; total_price: number }> {
+    try {
+      const { room_id, guest_name, guest_phone, guest_id_number, check_in_date, check_out_date, guest_count, special_requests, payment_method } = data;
+      
+      const [roomRows] = await pool.query<RowDataPacket[]>('SELECT room_price FROM rooms WHERE id = ?', [room_id]);
+      
+      if (roomRows.length === 0) {
+        throw new Error('房间不存在');
+      }
+      
+      const roomPrice = (roomRows[0] as any).room_price;
+      const checkIn = new Date(check_in_date);
+      const checkOut = new Date(check_out_date);
+      const days = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+      const totalPrice = roomPrice * days;
+      
+      const bookingNumber = `BK${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}${uuidv4().slice(0, 8).toUpperCase()}`;
+      
+      const [result] = await pool.query<ResultSetHeader>(
+        'INSERT INTO bookings (booking_number, room_id, guest_name, guest_phone, guest_id_number, check_in_date, check_out_date, guest_count, special_requests, payment_method, total_price, deposit, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [bookingNumber, room_id, guest_name, guest_phone, guest_id_number, check_in_date, check_out_date, guest_count, special_requests, payment_method, totalPrice, 0, 'pending']
+      );
+      
+      return {
+        id: result.insertId,
+        booking_number: bookingNumber,
+        total_price: totalPrice
+      };
+    } catch (error) {
+      logger.error('创建预订失败:', error);
+      throw new Error('创建预订失败');
+    }
+  }
+
+  static async confirmBooking(id: number): Promise<boolean> {
+    try {
+      const [result] = await pool.query<ResultSetHeader>(
+        'UPDATE bookings SET status = ? WHERE id = ?',
+        ['confirmed', id]
+      );
+      return result.affectedRows > 0;
+    } catch (error) {
+      logger.error('确认预订失败:', error);
+      throw new Error('确认预订失败');
+    }
+  }
+
+  static async checkIn(id: number): Promise<boolean> {
+    try {
+      const [result] = await pool.query<ResultSetHeader>(
+        'UPDATE bookings SET status = ?, check_in_time = CURRENT_TIMESTAMP WHERE id = ?',
+        ['checked_in', id]
+      );
+      return result.affectedRows > 0;
+    } catch (error) {
+      logger.error('办理入住失败:', error);
+      throw new Error('办理入住失败');
+    }
+  }
+
+  static async checkOut(id: number): Promise<boolean> {
+    try {
+      const [result] = await pool.query<ResultSetHeader>(
+        'UPDATE bookings SET status = ?, check_out_time = CURRENT_TIMESTAMP WHERE id = ?',
+        ['checked_out', id]
+      );
+      return result.affectedRows > 0;
+    } catch (error) {
+      logger.error('办理退房失败:', error);
+      throw new Error('办理退房失败');
+    }
+  }
+
+  static async cancelBooking(id: number): Promise<boolean> {
+    try {
+      const [result] = await pool.query<ResultSetHeader>(
+        'UPDATE bookings SET status = ?, cancelled_at = CURRENT_TIMESTAMP WHERE id = ?',
+        ['cancelled', id]
+      );
+      return result.affectedRows > 0;
+    } catch (error) {
+      logger.error('取消预订失败:', error);
+      throw new Error('取消预订失败');
+    }
+  }
+}

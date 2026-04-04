@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  # MySQL数据库
+  mysql:
+    image: mysql:8.0
+    container_name: iot-hotel-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_DATABASE=iot_hotel_system
+      - MYSQL_USER=iot_user
+      - MYSQL_PASSWORD=iot_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    networks:
+      - iot-network
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: iot-hotel-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - iot-network
+
+  # MQTT Broker
+  mqtt:
+    image: eclipse-mosquitto:2.0
+    container_name: iot-hotel-mqtt
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - mqtt-data:/mosquitto/data
+      - mqtt-log:/mosquitto/log
+      - ./mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
+    restart: unless-stopped
+    networks:
+      - iot-network
+
+  # 后端服务
+  backend:
+    build:
+      context: ../backend/iot-hotel-backend
+      dockerfile: Dockerfile
+    container_name: iot-hotel-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=iot_user
+      - DB_PASSWORD=iot_password
+      - DB_NAME=iot_hotel_system
+      - REDIS_URL=redis://redis:6379
+      - MQTT_HOST=mqtt
+      - MQTT_PORT=1883
+      - JWT_SECRET=iot_hotel_system_jwt_secret_2024
+    depends_on:
+      - mysql
+      - redis
+      - mqtt
+    restart: unless-stopped
+    networks:
+      - iot-network
+
+networks:
+  iot-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  mqtt-data:
+  mqtt-log:
