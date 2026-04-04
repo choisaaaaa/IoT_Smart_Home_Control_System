@@ -256,6 +256,21 @@ CREATE TABLE users (
     INDEX idx_username (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE employees (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id VARCHAR(50) NOT NULL UNIQUE COMMENT '员工工号',
+    name VARCHAR(100) NOT NULL COMMENT '员工姓名',
+    phone VARCHAR(20) DEFAULT NULL COMMENT '联系电话',
+    position VARCHAR(50) NOT NULL DEFAULT 'staff' COMMENT '职位(front_desk/manager/tech)',
+    department VARCHAR(50) DEFAULT 'front_desk' COMMENT '部门',
+    status ENUM('active', 'inactive', 'on_leave') NOT NULL DEFAULT 'active' COMMENT '状态',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_employee_id (employee_id),
+    INDEX idx_position (position),
+    INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='员工信息表';
+
 CREATE TABLE security_events (
     id INT AUTO_INCREMENT PRIMARY KEY,
     device_id VARCHAR(50) NOT NULL,
@@ -267,6 +282,29 @@ CREATE TABLE security_events (
     INDEX idx_created_at (created_at),
     INDEX idx_event_type (event_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE calls (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    call_id VARCHAR(64) NOT NULL,
+    caller_type ENUM('room', 'front_desk', 'ai', 'app') NOT NULL,
+    caller_id VARCHAR(64) NOT NULL COMMENT '主叫标识(房间号/员工ID/AI标识/App用户ID)',
+    callee_type ENUM('room', 'front_desk', 'ai', 'app') NOT NULL,
+    callee_id VARCHAR(64) NOT NULL COMMENT '被叫标识',
+    status ENUM('calling', 'outgoing', 'ringing', 'connected', 'ended', 'rejected', 'missed', 'busy') NOT NULL DEFAULT 'calling' COMMENT '通话状态',
+    started_at DATETIME NOT NULL COMMENT '通话开始时间',
+    answered_at DATETIME DEFAULT NULL COMMENT '接听时间',
+    ended_at DATETIME DEFAULT NULL COMMENT '结束时间',
+    duration_sec INT NOT NULL DEFAULT 0 COMMENT '通话时长(秒)',
+    recording_url VARCHAR(512) DEFAULT NULL COMMENT '录音文件URL(可选)',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_call_id (call_id),
+    INDEX idx_caller (caller_type, caller_id),
+    INDEX idx_callee (callee_type, callee_id),
+    INDEX idx_status (status),
+    INDEX idx_started_at (started_at),
+    INDEX idx_caller_time (caller_type, caller_id, started_at),
+    INDEX idx_callee_time (callee_type, callee_id, started_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='语音通话记录表（支持双向通话）';
 
 INSERT INTO hotels (hotel_name, hotel_address, hotel_phone, hotel_star, total_rooms, occupied_rooms, occupancy_rate, description) 
 VALUES ('智联酒店', '北京市朝阳区科技园路88号', '010-12345678', 5, 200, 87, 43.50, '智慧酒店物联网控制系统示范酒店，提供智能化客房体验');
@@ -317,5 +355,15 @@ INSERT INTO delivery_orders (order_no, room_id, item_category, item_name, quanti
 
 INSERT INTO maintenance_tickets (ticket_no, room_id, fault_type, fault_description, priority, status) VALUES
 ('MT20260404001', 9, 'air_conditioner', '空调不制冷，温度设定26度但实际出热风', 'high', 'pending');
+
+INSERT INTO employees (employee_id, name, phone, position, department, status) VALUES
+('FD001', '张前台', '13800001001', 'front_desk', 'front_desk', 'active'),
+('FD002', '李经理', '13800001002', 'manager', 'front_desk', 'active'),
+('FD003', '王客服', '13800001003', 'staff', 'front_desk', 'active');
+
+INSERT INTO calls (call_id, caller_type, caller_id, callee_type, callee_id, status, started_at, answered_at, ended_at, duration_sec) VALUES
+('CALL20260401001', 'room', '102', 'front_desk', 'FD001', 'ended', '2026-04-01 10:30:00', '2026-04-01 10:30:05', '2026-04-01 10:35:00', 295),
+('CALL20260402002', 'front_desk', 'FD002', 'room', '201', 'ended', '2026-04-02 14:20:00', '2026-04-02 14:20:08', '2026-04-02 14:25:30', 322),
+('CALL20260404003', 'ai', 'AI001', 'room', '301', 'calling', NOW(), NULL, NULL, 0);
 
 SET FOREIGN_KEY_CHECKS = 1;

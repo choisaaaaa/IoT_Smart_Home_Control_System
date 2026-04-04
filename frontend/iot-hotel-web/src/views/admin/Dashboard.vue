@@ -73,11 +73,11 @@ const deviceChartRef = ref<HTMLDivElement>()
 let chartInstance: echarts.ECharts | null = null
 
 const statsCards = computed(() => [
-  { key: 'rooms', title: '总客房', value: hotelStore.rooms.length, color: '#1890ff', icon: HomeOutlined },
-  { key: 'occupied', title: '已入住', value: hotelStore.getOccupiedRooms().length, color: '#52c41a', icon: UserOutlined },
+  { key: 'rooms', title: '总客房', value: hotelStore.rooms.length, color: '#1890ff', icon: HomeOutlined, suffix: '间' },
+  { key: 'occupied', title: '已入住', value: hotelStore.getOccupiedRooms().length, color: '#52c41a', icon: UserOutlined, suffix: '间' },
   { key: 'online', title: '设备在线', value: deviceStore.getOnlineCount(), color: '#52c41a', icon: CheckCircleOutlined },
   { key: 'error', title: '设备异常', value: deviceStore.getErrorCount(), color: '#ff4d4f', icon: WarningOutlined }
-])
+] as Array<{key: string; title: string; value: number; color: string; icon: any; suffix?: string}>)
 
 const roomColumns = [
   { title: '房号', dataIndex: 'room_number', width: 80 },

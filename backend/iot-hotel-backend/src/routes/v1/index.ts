@@ -16,7 +16,8 @@ router.get('/', (_req: Request, res: Response) => {
     coupons: '/api/v1/coupons',
     delivery: '/api/v1/delivery',
     maintenance: '/api/v1/maintenance',
-    reviews: '/api/v1/reviews'
+    reviews: '/api/v1/reviews',
+    calls: '/api/v1/calls'
   }));
 });
 

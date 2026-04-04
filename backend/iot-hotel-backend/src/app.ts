@@ -6,7 +6,7 @@ import rateLimit from 'express-rate-limit';
 
 import appConfig from './config/app';
 import routes from './routes';
-import { notFoundHandler, errorHandler } from '@middleware/error';
+import { notFoundHandler, errorHandler } from './middleware/error';
 
 const app: Application = express();
 

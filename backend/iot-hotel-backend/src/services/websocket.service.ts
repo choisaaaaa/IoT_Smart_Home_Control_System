@@ -3,12 +3,14 @@ import http from 'http';
 import config from '../config';
 import logger from '../utils/logger';
 import mqttService from './mqtt.service';
-import pool, { RowDataPacket } from '../config/database';
+import pool, { RowDataPacket, ResultSetHeader } from '../config/database';
 
 interface ClientInfo {
   socketId: string;
   roomId?: string;
   role?: string;
+  clientType?: 'room' | 'front_desk' | 'ai' | 'app';
+  clientId?: string;
   connectedAt: Date;
 }
 
@@ -51,7 +53,11 @@ class WebSocketService {
 
         socket.join(room);
         const info = this.clients.get(socket.id);
-        if (info) info.roomId = room;
+        if (info) {
+          info.roomId = room;
+          info.clientType = 'room';
+          info.clientId = room;
+        }
 
         logger.info(`客户端 ${socket.id} 加入房间: ${room}`);
 
@@ -84,6 +90,52 @@ class WebSocketService {
         const info = this.clients.get(socket.id);
         if (info?.roomId === roomId) info.roomId = undefined;
         logger.info(`客户端 ${socket.id} 离开房间: ${roomId}`);
+      });
+
+      socket.on('register_client', async (data: { 
+        clientType: 'room' | 'front_desk' | 'ai' | 'app'; 
+        clientId: string 
+      }) => {
+        try {
+          const validTypes = ['room', 'front_desk', 'ai', 'app'];
+          
+          if (!validTypes.includes(data.clientType)) {
+            socket.emit('error', { message: `无效的clientType，支持的值: ${validTypes.join(', ')}` });
+            return;
+          }
+          
+          const info = this.clients.get(socket.id);
+          if (info) {
+            info.clientType = data.clientType;
+            info.clientId = data.clientId;
+            
+            switch (data.clientType) {
+              case 'room':
+                socket.join(`room_${data.clientId}`);
+                break;
+              case 'front_desk':
+                socket.join('front_desk');
+                break;
+              case 'ai':
+                socket.join('ai');
+                break;
+              case 'app':
+                socket.join(`app_${data.clientId}`);
+                break;
+            }
+          }
+          
+          socket.emit('registered', {
+            clientType: data.clientType,
+            clientId: data.clientId,
+            timestamp: new Date().toISOString()
+          });
+          
+          logger.info(`客户端 ${socket.id} 注册为: ${data.clientType}/${data.clientId}`);
+        } catch (error) {
+          logger.error('注册客户端失败:', error);
+          socket.emit('error', { message: '注册失败' });
+        }
       });
 
       socket.on('send_message', (data: { roomId?: string; content: string; type?: string }) => {
@@ -126,6 +178,222 @@ class WebSocketService {
           status: commandId ? 'pending' : 'failed',
           timestamp: new Date().toISOString()
         });
+      });
+
+      socket.on('initiate_call', async (data: { 
+        caller_type?: 'room' | 'front_desk' | 'ai' | 'app'; 
+        caller_id?: string; 
+        callee_type: 'room' | 'front_desk' | 'ai' | 'app'; 
+        callee_id: string; 
+        type?: string 
+      }) => {
+        try {
+          const clientInfo = this.clients.get(socket.id);
+          const caller_type = data.caller_type || clientInfo?.clientType || 'room';
+          const caller_id = data.caller_id || clientInfo?.clientId || clientInfo?.roomId || 'unknown';
+          const callee_type = data.callee_type;
+          const callee_id = data.callee_id;
+          const callType = data.type || 'voice';
+          
+          const validTypes = ['room', 'front_desk', 'ai', 'app'];
+          
+          if (!validTypes.includes(caller_type)) {
+            socket.emit('call_error', { message: `无效的caller_type，支持的值: ${validTypes.join(', ')}` });
+            return;
+          }
+          
+          if (!validTypes.includes(callee_type)) {
+            socket.emit('call_error', { message: `无效的callee_type，支持的值: ${validTypes.join(', ')}` });
+            return;
+          }
+          
+          const callId = `CALL${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+          
+          let calleeExists = false;
+          
+          switch (callee_type) {
+            case 'room':
+              const [room] = await pool.query<RowDataPacket[]>('SELECT id, room_number FROM rooms WHERE id = ? OR room_number = ?', [callee_id, callee_id]);
+              calleeExists = room.length > 0;
+              break;
+            case 'front_desk':
+              const [employee] = await pool.query<RowDataPacket[]>('SELECT id FROM employees WHERE id = ?', [callee_id]);
+              calleeExists = employee.length > 0;
+              break;
+            case 'ai':
+              calleeExists = true;
+              break;
+            case 'app':
+              const [user] = await pool.query<RowDataPacket[]>('SELECT id FROM users WHERE id = ?', [callee_id]);
+              calleeExists = user.length > 0;
+              break;
+          }
+          
+          if (!calleeExists) {
+            socket.emit('call_error', { message: '被叫方不存在' });
+            return;
+          }
+          
+          const [existingCall] = await pool.query<RowDataPacket[]>(
+            'SELECT * FROM calls WHERE (callee_type = ? AND callee_id = ? OR caller_type = ? AND caller_id = ?) AND status IN (?, ?, ?, ?) LIMIT 1',
+            [callee_type, callee_id, callee_type, callee_id, 'calling', 'outgoing', 'ringing', 'connected']
+          );
+          
+          if (existingCall.length > 0) {
+            socket.emit('call_error', { message: '该用户已有通话进行中' });
+            return;
+          }
+          
+          const [result] = await pool.query<ResultSetHeader>(
+            `INSERT INTO calls (call_id, caller_type, caller_id, callee_type, callee_id, status, started_at) 
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [callId, caller_type, caller_id, callee_type, callee_id, 'calling', new Date()]
+          );
+          
+          const callData = {
+            call_id: callId,
+            caller_type,
+            caller_id,
+            callee_type,
+            callee_id,
+            status: 'calling',
+            type: callType,
+            started_at: new Date().toISOString()
+          };
+          
+          socket.emit('call_initiated', callData);
+          
+          this.io?.to(`${callee_type}_${callee_id}`).emit('incoming_call', callData);
+          
+          logger.info(`通话发起: ${caller_type}/${caller_id} -> ${callee_type}/${callee_id} (${callId})`);
+        } catch (error) {
+          logger.error('发起语音通话失败:', error);
+          socket.emit('call_error', { message: '发起语音通话失败' });
+        }
+      });
+
+      socket.on('answer_call', async (data: { callId: string }) => {
+        try {
+          const callId = String(data.callId).trim();
+          
+          const [call] = await pool.query<RowDataPacket[]>('SELECT * FROM calls WHERE call_id = ?', [callId]);
+          if (call.length === 0) {
+            socket.emit('call_error', { message: '通话不存在' });
+            return;
+          }
+          
+          const callData = call[0];
+          
+          if (['ended', 'rejected'].includes(callData.status)) {
+            socket.emit('call_error', { message: '通话已结束或已拒接' });
+            return;
+          }
+          
+          const [result] = await pool.query<ResultSetHeader>(
+            `UPDATE calls SET status = ?, answered_at = ? WHERE call_id = ?`,
+            ['connected', new Date(), callId]
+          );
+          
+          const answerData = {
+            call_id: callId,
+            status: 'connected',
+            answered_at: new Date().toISOString()
+          };
+          
+          socket.emit('call_answered', answerData);
+          
+          this.io?.to(`${callData.caller_type}_${callData.caller_id}`).emit('call_answered', answerData);
+          
+          logger.info(`通话接听: ${callId}`);
+        } catch (error) {
+          logger.error('接听语音通话失败:', error);
+          socket.emit('call_error', { message: '接听语音通话失败' });
+        }
+      });
+
+      socket.on('reject_call', async (data: { callId: string }) => {
+        try {
+          const callId = String(data.callId).trim();
+          
+          const [call] = await pool.query<RowDataPacket[]>('SELECT * FROM calls WHERE call_id = ?', [callId]);
+          if (call.length === 0) {
+            socket.emit('call_error', { message: '通话不存在' });
+            return;
+          }
+          
+          const callData = call[0];
+          
+          if (callData.status === 'ended') {
+            socket.emit('call_error', { message: '通话已结束' });
+            return;
+          }
+          
+          const [result] = await pool.query<ResultSetHeader>(
+            `UPDATE calls SET status = ?, ended_at = ? WHERE call_id = ?`,
+            ['rejected', new Date(), callId]
+          );
+          
+          const rejectData = {
+            call_id: callId,
+            status: 'rejected',
+            ended_at: new Date().toISOString()
+          };
+          
+          socket.emit('call_rejected', rejectData);
+          
+          this.io?.to(`${callData.caller_type}_${callData.caller_id}`).emit('call_rejected', rejectData);
+          
+          logger.info(`通话拒接: ${callId}`);
+        } catch (error) {
+          logger.error('拒接语音通话失败:', error);
+          socket.emit('call_error', { message: '拒接语音通话失败' });
+        }
+      });
+
+      socket.on('hangup_call', async (data: { callId: string }) => {
+        try {
+          const callId = String(data.callId).trim();
+          
+          const [call] = await pool.query<RowDataPacket[]>('SELECT * FROM calls WHERE call_id = ?', [callId]);
+          if (call.length === 0) {
+            socket.emit('call_error', { message: '通话不存在' });
+            return;
+          }
+          
+          const callData = call[0];
+          
+          if (callData.status === 'ended') {
+            socket.emit('call_error', { message: '通话已结束' });
+            return;
+          }
+          
+          const endedAt = new Date();
+          const durationSec = callData.answered_at 
+            ? Math.floor((endedAt.getTime() - new Date(callData.answered_at).getTime()) / 1000)
+            : 0;
+          
+          const [result] = await pool.query<ResultSetHeader>(
+            `UPDATE calls SET status = ?, ended_at = ?, duration_sec = ? WHERE call_id = ?`,
+            ['ended', endedAt, durationSec, callId]
+          );
+          
+          const hangupData = {
+            call_id: callId,
+            status: 'ended',
+            ended_at: endedAt.toISOString(),
+            duration_sec: durationSec
+          };
+          
+          socket.emit('call_hungup', hangupData);
+          
+          this.io?.to(`${callData.caller_type}_${callData.caller_id}`).emit('call_hungup', hangupData);
+          this.io?.to(`${callData.callee_type}_${callData.callee_id}`).emit('call_hungup', hangupData);
+          
+          logger.info(`通话挂断: ${callId}, 时长: ${durationSec}秒`);
+        } catch (error) {
+          logger.error('挂断语音通话失败:', error);
+          socket.emit('call_error', { message: '挂断语音通话失败' });
+        }
       });
 
       socket.on('get_room_status', async (roomId: string) => {
@@ -184,23 +452,23 @@ class WebSocketService {
     logger.info('WebSocket服务已启动');
   }
 
-  emit(event: string, data: any, roomId?: string) {
+  emit(event: string, data: any, target?: string) {
     if (!this.io) {
       return;
     }
 
-    if (roomId) {
-      this.io.to(roomId).emit(event, data);
+    if (target) {
+      this.io.to(target).emit(event, data);
     } else {
       this.io.emit(event, data);
     }
   }
 
-  emitToRoom(roomId: string, event: string, data: any) {
-    this.emit(event, data, roomId);
+  emitToClient(clientType: string, clientId: string, event: string, data: any) {
+    this.emit(event, data, `${clientType}_${clientId}`);
   }
 
-  broadcastToAllRooms(event: string, data: any) {
+  broadcastToAll(event: string, data: any) {
     this.emit(event, data);
   }
 
@@ -214,6 +482,14 @@ class WebSocketService {
       if (info.roomId === roomId) clients.push(socketId);
     });
     return clients;
+  }
+
+  getClientsByType(clientType: string): ClientInfo[] {
+    const result: ClientInfo[] = [];
+    this.clients.forEach((info) => {
+      if (info.clientType === clientType) result.push(info);
+    });
+    return result;
   }
 
   getIO(): Server | null {

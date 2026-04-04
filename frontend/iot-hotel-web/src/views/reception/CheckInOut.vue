@@ -93,7 +93,7 @@
         <a-table
           :columns="checkoutColumns"
           :data-source="currentGuests"
-          :row-selection="{ selectedRowKeys: checkoutKeys, onChange: (k) => checkoutKeys = k }"
+          :row-selection="{ selectedRowKeys: checkoutKeys, onChange: (k: (string | number)[]) => { checkoutKeys = k as number[] } }"
           :pagination="{ pageSize: 8 }"
           row-key="id"
           size="middle"

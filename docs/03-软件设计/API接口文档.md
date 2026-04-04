@@ -1967,9 +1967,9 @@ Authorization: Bearer <token>
 
 ## 📞 语音通话接口
 
-### 1. 住客发起语音通话请求
+### 1. 发起语音通话请求
 
-**接口说明**：住客发起语音通话请求（客房端）
+**接口说明**：支持住客、前台、AI管家、手机App发起语音通话请求
 
 **请求方式**：`POST`
 
@@ -1984,10 +1984,23 @@ Authorization: Bearer <token>
 **请求体**：
 ```json
 {
-  "room_id": "301",
+  "caller_type": "room",
+  "caller_id": "301",
+  "callee_type": "front_desk",
+  "callee_id": "FD001",
   "type": "voice"
 }
 ```
+
+**请求参数说明**：
+
+| 参数名 | 类型 | 必填 | 说明 | 示例值 |
+|--------|------|------|------|--------|
+| caller_type | string | 是 | 主叫方类型：`room`(客房) \| `front_desk`(前台) \| `ai`(AI管家) \| `app`(手机App) | `room` |
+| caller_id | string | 是 | 主叫方ID（房间号/员工ID/AI标识/App用户ID） | `301` |
+| callee_type | string | 是 | 被叫方类型：`room` \| `front_desk` \| `ai` \| `app` | `front_desk` |
+| callee_id | string | 是 | 被叫方ID | `FD001` |
+| type | string | 否 | 通话类型：`voice`(语音) \| `video`(视频) | `voice` |
 
 **响应示例**：
 ```json
@@ -2008,15 +2021,60 @@ Authorization: Bearer <token>
 
 **错误码**：
 - `401` - Token无效或已过期
-- `400` - 房间不存在
-- `400` - 通话类型错误
+- `400` - 请求参数错误
 - `409` - 已有通话进行中
+
+**示例场景**：
+
+**场景1：客房发起通话**
+```json
+{
+  "caller_type": "room",
+  "caller_id": "301",
+  "callee_type": "front_desk",
+  "callee_id": "FD001",
+  "type": "voice"
+}
+```
+
+**场景2：前台发起通话**
+```json
+{
+  "caller_type": "front_desk",
+  "caller_id": "FD001",
+  "callee_type": "room",
+  "callee_id": "301",
+  "type": "voice"
+}
+```
+
+**场景3：AI管家发起通话**
+```json
+{
+  "caller_type": "ai",
+  "caller_id": "AI001",
+  "callee_type": "room",
+  "callee_id": "301",
+  "type": "voice"
+}
+```
+
+**场景4：手机App发起通话**
+```json
+{
+  "caller_type": "app",
+  "caller_id": "USER123",
+  "callee_type": "front_desk",
+  "callee_id": "FD001",
+  "type": "voice"
+}
+```
 
 ***
 
-### 2. 前台主动发起语音通话
+### 2. 主动发起语音通话
 
-**接口说明**：前台主动呼叫指定房间（前台管理端）
+**接口说明**：前台、AI管家、手机App主动呼叫指定房间或其他终端
 
 **请求方式**：`POST`
 
@@ -2031,11 +2089,23 @@ Authorization: Bearer <token>
 **请求体**：
 ```json
 {
-  "room_id": "301",
+  "caller_type": "front_desk",
   "caller_id": "FD001",
+  "callee_type": "room",
+  "callee_id": "301",
   "type": "voice"
 }
 ```
+
+**请求参数说明**：
+
+| 参数名 | 类型 | 必填 | 说明 | 示例值 |
+|--------|------|------|------|--------|
+| caller_type | string | 是 | 主叫方类型：`front_desk`(前台) \| `ai`(AI管家) \| `app`(手机App) | `front_desk` |
+| caller_id | string | 是 | 主叫方ID（员工ID/AI标识/App用户ID） | `FD001` |
+| callee_type | string | 是 | 被叫方类型：`room` \| `front_desk` \| `ai` \| `app` | `room` |
+| callee_id | string | 是 | 被叫方ID | `301` |
+| type | string | 否 | 通话类型：`voice`(语音) \| `video`(视频) | `voice` |
 
 **响应示例**：
 ```json
@@ -2056,9 +2126,43 @@ Authorization: Bearer <token>
 
 **错误码**：
 - `401` - Token无效或已过期
-- `400` - 房间不存在
-- `400` - 员工ID不存在
-- `409` - 房间已有呼出进行中
+- `400` - 请求参数错误
+- `409` - 通话已在进行中
+
+**示例场景**：
+
+**场景1：前台发起通话**
+```json
+{
+  "caller_type": "front_desk",
+  "caller_id": "FD001",
+  "callee_type": "room",
+  "callee_id": "301",
+  "type": "voice"
+}
+```
+
+**场景2：AI管家发起通话**
+```json
+{
+  "caller_type": "ai",
+  "caller_id": "AI001",
+  "callee_type": "room",
+  "callee_id": "301",
+  "type": "voice"
+}
+```
+
+**场景3：手机App发起通话**
+```json
+{
+  "caller_type": "app",
+  "caller_id": "USER123",
+  "callee_type": "front_desk",
+  "callee_id": "FD001",
+  "type": "voice"
+}
+```
 
 ***
 
@@ -3132,6 +3236,410 @@ Authorization: Bearer <token>
         "id": 1,
         "device_id": "SUB2001",
         "event_type": "intrusion",
-        "event_data": {"sensor": "motion", "location": "living
+        "event_data": {"sensor": "motion", "location": "living room", "timestamp": "2024-01-18 10:00:00"},
+        "level": "critical",
+        "status": "unhandled",
+        "created_at": "2024-01-18 10:00:00"
+      }
+    ]
+  }
+}
 ```
+
+**错误码**：
+
+- `401` - Token无效或已过期
+
+***
+
+## 📡 WebSocket API
+
+### 1. 连接WebSocket
+
+**接口说明**：建立WebSocket连接
+
+**连接地址**：
+```
+ws://localhost:3000/api/v1/ws?token=<jwt_token>
+```
+
+**连接参数**：
+
+| 参数名 | 类型 | 必填 | 说明 | 示例值 |
+|--------|------|------|------|--------|
+| token | string | 是 | JWT Token | `eyJhbGci...` |
+
+**响应示例**（连接成功）：
+```json
+{
+  "event": "connected",
+  "data": {
+    "connection_id": "conn_123456",
+    "timestamp": "2026-04-04 15:30:00"
+  }
+}
+```
+
+***
+
+### 2. 通话事件
+
+**接口说明**：实时推送通话状态变化
+
+**事件列表**：
+
+| 事件名 | 说明 | 触发方 |
+|--------|------|--------|
+| `call_initiated` | 通话请求已发起 | 主叫方 |
+| `call_ringing` | 通话振铃 | 被叫方 |
+| `call_answered` | 通话已接听 | 被叫方 |
+| `call_rejected` | 通话已拒接 | 被叫方 |
+| `call_hungup` | 通话已挂断 | 任一方 |
+| `call_ended` | 通话已结束 | 系统 |
+| `call_busy` | 对方忙线 | 被叫方 |
+| `call_missed` | 通话未接听 | 被叫方 |
+
+**事件格式**：
+
+```json
+{
+  "event": "call_initiated",
+  "data": {
+    "call_id": "CALL20260404001",
+    "caller_type": "room",
+    "caller_id": "301",
+    "callee_type": "front_desk",
+    "callee_id": "FD001",
+    "status": "calling",
+    "started_at": "2026-04-04 15:30:00"
+  }
+}
+```
+
+**事件参数说明**：
+
+| 参数名 | 类型 | 说明 | 示例值 |
+|--------|------|------|--------|
+| event | string | 事件名称 | `call_initiated` |
+| data.call_id | string | 通话ID | `CALL20260404001` |
+| data.caller_type | string | 主叫方类型：`room` \| `front_desk` \| `ai` \| `app` | `room` |
+| data.caller_id | string | 主叫方ID | `301` |
+| data.callee_type | string | 被叫方类型：`room` \| `front_desk` \| `ai` \| `app` | `front_desk` |
+| data.callee_id | string | 被叫方ID | `FD001` |
+| data.status | string | 通话状态 | `calling` |
+| data.started_at | string | 开始时间 | `2026-04-04 15:30:00` |
+
+**示例场景**：
+
+**场景1：客房发起通话**
+```json
+{
+  "event": "call_initiated",
+  "data": {
+    "call_id": "CALL20260404001",
+    "caller_type": "room",
+    "caller_id": "301",
+    "callee_type": "front_desk",
+    "callee_id": "FD001",
+    "status": "calling",
+    "started_at": "2026-04-04 15:30:00"
+  }
+}
+```
+
+**场景2：前台发起通话**
+```json
+{
+  "event": "call_initiated",
+  "data": {
+    "call_id": "CALL20260404002",
+    "caller_type": "front_desk",
+    "caller_id": "FD001",
+    "callee_type": "room",
+    "callee_id": "301",
+    "status": "outgoing",
+    "started_at": "2026-04-04 15:30:00"
+  }
+}
+```
+
+**场景3：AI管家发起通话**
+```json
+{
+  "event": "call_initiated",
+  "data": {
+    "call_id": "CALL20260404003",
+    "caller_type": "ai",
+    "caller_id": "AI001",
+    "callee_type": "room",
+    "callee_id": "301",
+    "status": "calling",
+    "started_at": "2026-04-04 15:30:00"
+  }
+}
+```
+
+**场景4：手机App发起通话**
+```json
+{
+  "event": "call_initiated",
+  "data": {
+    "call_id": "CALL20260404004",
+    "caller_type": "app",
+    "caller_id": "USER123",
+    "callee_type": "front_desk",
+    "callee_id": "FD001",
+    "status": "calling",
+    "started_at": "2026-04-04 15:30:00"
+  }
+}
+```
+
+**场景5：通话振铃**
+```json
+{
+  "event": "call_ringing",
+  "data": {
+    "call_id": "CALL20260404001",
+    "caller_type": "room",
+    "caller_id": "301",
+    "callee_type": "front_desk",
+    "callee_id": "FD001",
+    "status": "ringing",
+    "ringing_at": "2026-04-04 15:30:01"
+  }
+}
+```
+
+**场景6：通话已接听**
+```json
+{
+  "event": "call_answered",
+  "data": {
+    "call_id": "CALL20260404001",
+    "caller_type": "room",
+    "caller_id": "301",
+    "callee_type": "front_desk",
+    "callee_id": "FD001",
+    "status": "connected",
+    "answered_at": "2026-04-04 15:30:05"
+  }
+}
+```
+
+**场景7：通话已挂断**
+```json
+{
+  "event": "call_hungup",
+  "data": {
+    "call_id": "CALL20260404001",
+    "caller_type": "room",
+    "caller_id": "301",
+    "callee_type": "front_desk",
+    "callee_id": "FD001",
+    "status": "ended",
+    "ended_at": "2026-04-04 15:35:00",
+    "duration_sec": 300
+  }
+}
+```
+
+***
+
+### 3. 心跳保持
+
+**接口说明**：定期发送心跳保持连接
+
+**发送格式**：
+```json
+{
+  "event": "ping",
+  "data": {
+    "timestamp": "2026-04-04 15:30:00"
+  }
+}
+```
+
+**响应格式**：
+```json
+{
+  "event": "pong",
+  "data": {
+    "timestamp": "2026-04-04 15:30:00"
+  }
+}
+```
+
+***
+
+### 4. 错误处理
+
+**接口说明**：WebSocket连接错误处理
+
+**错误事件**：
+
+| 错误码 | 说明 | 解决方案 |
+|--------|------|----------|
+| `auth_failed` | 认证失败 | 检查Token是否有效 |
+| `connection_timeout` | 连接超时 | 重连WebSocket |
+| `server_error` | 服务器错误 | 稍后重试 |
+| `invalid_event` | 无效事件 | 检查事件格式 |
+
+**错误示例**：
+```json
+{
+  "event": "error",
+  "data": {
+    "code": "auth_failed",
+    "message": "Token无效或已过期",
+    "timestamp": "2026-04-04 15:30:00"
+  }
+}
+```
+
+***
+
+## 📡 MQTT API
+
+### 1. 设备连接
+
+**接口说明**：设备通过MQTT连接到服务器
+
+**连接地址**：
+```
+mqtt://localhost:1883
+```
+
+**连接参数**：
+
+| 参数名 | 类型 | 必填 | 说明 | 示例值 |
+|--------|------|------|------|--------|
+| client_id | string | 是 | 设备ID | `room_301` |
+| username | string | 是 | 设备类型 | `room` |
+| password | string | 是 | 设备密钥 | `device_secret` |
+
+**连接主题**：
+```
+hotel/device/{device_id}/status
+```
+
+***
+
+### 2. 通话MQTT主题
+
+**接口说明**：语音通话相关的MQTT主题
+
+**主题列表**：
+
+| 主题 | 方向 | 说明 |
+|------|------|------|
+| `hotel/room/{room_id}/call/incoming` | 推送 | 客房接收呼入通话 |
+| `hotel/room/{room_id}/call/outgoing` | 推送 | 客房接收呼出通话 |
+| `hotel/room/{room_id}/call/status` | 双向 | 客房发送通话状态 |
+| `hotel/front_desk/call/incoming` | 推送 | 前台接收呼入通话 |
+| `hotel/front_desk/call/status` | 双向 | 前台发送通话状态 |
+| `hotel/ai/call/incoming` | 推送 | AI管家接收呼入通话 |
+| `hotel/ai/call/status` | 双向 | AI管家发送通话状态 |
+| `hotel/app/call/incoming` | 推送 | 手机App接收呼入通话 |
+| `hotel/app/call/status` | 双向 | 手机App发送通话状态 |
+
+**主题示例**：
+
+**客房接收呼入通话**：
+```json
+{
+  "topic": "hotel/room/301/call/incoming",
+  "payload": {
+    "call_id": "CALL20260404001",
+    "caller_type": "front_desk",
+    "caller_id": "FD001",
+    "callee_type": "room",
+    "callee_id": "301",
+    "status": "incoming",
+    "timestamp": "2026-04-04 15:30:00"
+  }
+}
+```
+
+**客房发送通话状态**：
+```json
+{
+  "topic": "hotel/room/301/call/status",
+  "payload": {
+    "call_id": "CALL20260404001",
+    "status": "connected",
+    "answered_at": "2026-04-04 15:30:05"
+  }
+}
+```
+
+**AI管家接收呼入通话**：
+```json
+{
+  "topic": "hotel/ai/call/incoming",
+  "payload": {
+    "call_id": "CALL20260404003",
+    "caller_type": "room",
+    "caller_id": "301",
+    "callee_type": "ai",
+    "callee_id": "AI001",
+    "status": "incoming",
+    "timestamp": "2026-04-04 15:30:00"
+  }
+}
+```
+
+**手机App接收呼入通话**：
+```json
+{
+  "topic": "hotel/app/call/incoming",
+  "payload": {
+    "call_id": "CALL20260404004",
+    "caller_type": "room",
+    "caller_id": "301",
+    "callee_type": "app",
+    "callee_id": "USER123",
+    "status": "incoming",
+    "timestamp": "2026-04-04 15:30:00"
+  }
+}
+```
+
+***
+
+## 🔐 错误码
+
+### 通用错误码
+
+| 错误码 | 说明 |
+|--------|------|
+| 200 | 请求成功 |
+| 400 | 请求参数错误 |
+| 401 | 未授权 |
+| 403 | 禁止访问 |
+| 404 | 资源不存在 |
+| 405 | 方法不允许 |
+| 409 | 冲突 |
+| 429 | 请求过多 |
+| 500 | 服务器内部错误 |
+| 502 | 网关错误 |
+| 503 | 服务不可用 |
+
+***
+
+## 📝 版本历史
+
+### v2.0.0 - 2026年4月
+
+- 重构为智慧酒店三层架构
+- 新增预订系统、支付接口、会员机制、优惠券机制
+- 新增酒店房间管理、送物订单、报修工单接口
+- 优化系统架构设计
+- 新增语音通话接口（支持双向通话）
+- 新增WebSocket实时通信接口
+- 新增MQTT设备通信接口
+
+***
+
+**文档结束**
 
