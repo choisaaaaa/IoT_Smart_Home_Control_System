@@ -1,22 +1,50 @@
 # 部署运维文档
 
-本目录包含部署和运维相关的文档，涵盖部署方案、运维管理、监控告警等内容。
+本目录包含部署和运维相关的文档，涵盖Docker部署、云服务器部署、监控告警、性能优化等内容。
 
 ## 📚 文档列表
 
-### 1. 三端语音智能体部署指南.md
-- **描述**：三端语音智能体的部署指南
+### 0. 00-目录说明.md
+- **描述**：部署运维目录完整说明
 - **内容**：
-  - 部署方案（本地开发 + Docker部署、云服务器部署）
-  - 环境准备
-  - 配置说明
-  - 启动服务
-  - 测试验证
+  - 文档结构说明
+  - 快速开始指南
+  - 学习路径推荐
+  - 文档关系图
+
+### 1. 跨平台开发环境配置指南.md
+- **描述**：Windows本地开发 + Ubuntu云服务器部署的完整指南
+- **内容**：
+  - Windows本地开发环境配置（Docker Desktop/WSL2）
+  - Ubuntu云服务器环境配置
+  - 环境同步方案（Docker/Git/CI/CD）
+  - 常见问题解决
+  - 最佳实践建议
+
+### 2. Docker部署和访问指南.md
+- **描述**：Docker部署的详细指南
+- **内容**：
+  - Docker环境准备
+  - 项目结构说明
+  - Docker Compose配置
+  - 服务启动与管理
+  - 访问与测试
   - 常见问题
+
+### 3. Ubuntu云服务器部署指南.md
+- **描述**：Ubuntu云服务器部署指南
+- **内容**：
+  - 云服务器选购与配置
+  - Ubuntu系统初始化
+  - Docker环境安装
+  - 项目部署步骤
+  - 域名与SSL配置
+  - Nginx反向代理
+  - 自动化部署
 
 ---
 
-## 🚀 部署方案
+## 🚀 快速部署
 
 ### 方案1：本地开发 + Docker部署（推荐）
 
@@ -26,8 +54,8 @@
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/choisaaaaa/IoT_Smart_Home_Control_System.git
-cd IoT_Smart_Home_Control_System
+git clone https://github.com/your-username/iot-smart-hotel.git
+cd iot-smart-hotel
 
 # 2. 配置环境变量
 cd backend
@@ -50,7 +78,7 @@ curl http://localhost:3000/api/v1/health
 | 服务 | 端口 | 说明 |
 |------|------|------|
 | 后端服务 | 3000 | Node.js后端API服务 |
-| 前端服务 | 8080 | Vue3前端服务 |
+| 前端服务 | 80 | Vue3前端服务 |
 | MySQL | 3306 | MySQL数据库服务 |
 | Redis | 6379 | Redis缓存服务 |
 | MQTT Broker | 1883 | MQTT消息 broker服务 |
@@ -71,8 +99,8 @@ sudo sh get-docker.sh
 sudo usermod -aG docker $USER
 
 # 2. 克隆项目
-git clone https://github.com/choisaaaaa/IoT_Smart_Home_Control_System.git
-cd IoT_Smart_Home_Control_System
+git clone https://github.com/your-username/iot-smart-hotel.git
+cd iot-smart-hotel
 
 # 3. 配置环境变量
 cd backend
@@ -84,7 +112,7 @@ cd ..
 docker-compose up -d
 
 # 5. 配置 Nginx 反向代理（可选）
-# 参考部署指南第 2.6 节
+# 参考 Ubuntu云服务器部署指南
 
 # 6. 获取服务器公网 IP
 curl ifconfig.me
@@ -136,17 +164,17 @@ docker-compose restart
 
 #### 备份数据库
 ```bash
-docker exec -t mysql mysqldump -u root -p<password> iot_system > backup.sql
+docker exec -t mysql mysqldump -u root -p<password> iot_smart_hotel > backup.sql
 ```
 
 #### 恢复数据库
 ```bash
-docker exec -i mysql mysql -u root -p<password> iot_system < backup.sql
+docker exec -i mysql mysql -u root -p<password> iot_smart_hotel < backup.sql
 ```
 
 #### 清空数据库
 ```bash
-docker exec -i mysql mysql -u root -p<password> -e "DROP DATABASE iot_system; CREATE DATABASE iot_system;"
+docker exec -i mysql mysql -u root -p<password> -e "DROP DATABASE iot_smart_hotel; CREATE DATABASE iot_smart_hotel;"
 ```
 
 ---
@@ -222,6 +250,15 @@ docker exec -i mysql mysql -u root -p<password> -e "DROP DATABASE iot_system; CR
 ### 问题4：API响应慢
 **原因**：数据库查询慢或网络延迟
 **解决**：优化数据库查询或检查网络状况
+
+### 问题5：Windows和Ubuntu环境不一致
+**原因**：操作系统差异导致路径、权限等问题
+**解决**：使用Docker容器化开发，确保环境完全一致
+**参考**：[跨平台开发环境配置指南](./跨平台开发环境配置指南.md)
+
+### 问题6：如何快速开始开发？
+**解决**：按照[00-目录说明.md](./00-目录说明.md)中的学习路径开始
+**参考**：[00-目录说明.md](./00-目录说明.md)
 
 ---
 
