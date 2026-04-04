@@ -3,9 +3,11 @@
 ## 📋 文档概述
 
 ### 文档说明
+
 本文档描述智慧酒店物联网控制系统的API接口设计，包括RESTful API、WebSocket API、MQTT API、认证方式、错误码等内容。
 
 ### 适用范围
+
 - 后端API开发
 - 前端API调用
 - 嵌入式设备通信
@@ -13,36 +15,42 @@
 - API文档维护
 
 ### 文档版本
+
 - **v2.0.0** - 2026年4月
   - 重构为智慧酒店三层架构
   - 新增预订系统、支付接口、会员机制、优惠券机制
   - 新增酒店房间管理、送物订单、报修工单接口
   - 优化系统架构设计
 
----
+***
 
 ## 📡 API概览
 
 ### API基路径
+
 ```
 /api/v1
 ```
 
 ### API版本
+
 - **v1** - 第一版API
 
 ### 请求格式
+
 - **Content-Type**: `application/json`
 - **Accept**: `application/json`
 
 ### 响应格式
+
 - **Content-Type**: `application/json`
 
 ### 认证方式
+
 - **JWT Token**: JSON Web Token认证（用户认证）
 - **设备认证**: 设备ID + 设备密钥（设备认证）
 
----
+***
 
 ## 🔐 认证接口
 
@@ -55,11 +63,13 @@
 **请求路径**：`/auth/login`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 ```
 
 **请求体**：
+
 ```json
 {
   "username": "admin",
@@ -68,6 +78,7 @@ Content-Type: application/json
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -89,10 +100,11 @@ Content-Type: application/json
 ```
 
 **错误码**：
+
 - `401` - 用户名或密码错误
 - `404` - 用户不存在
 
----
+***
 
 ### 2. 用户登出
 
@@ -103,17 +115,20 @@ Content-Type: application/json
 **请求路径**：`/auth/logout`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {}
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -123,9 +138,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ### 3. 刷新Token
 
@@ -136,17 +152,20 @@ Authorization: Bearer <token>
 **请求路径**：`/auth/refresh`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <refresh_token>
 ```
 
 **请求体**：
+
 ```json
 {}
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -159,9 +178,10 @@ Authorization: Bearer <refresh_token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ### 4. 获取用户信息
 
@@ -172,11 +192,13 @@ Authorization: Bearer <refresh_token>
 **请求路径**：`/auth/profile`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -194,9 +216,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ## 🏨 酒店管理接口
 
@@ -209,11 +232,13 @@ Authorization: Bearer <token>
 **请求路径**：`/hotels/info`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -234,9 +259,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ### 2. 更新酒店信息
 
@@ -247,12 +273,14 @@ Authorization: Bearer <token>
 **请求路径**：`/hotels/info`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "hotel_name": "智联酒店",
@@ -263,6 +291,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -279,10 +308,11 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `400` - 请求参数错误
 
----
+***
 
 ## 🚪 房间管理接口
 
@@ -295,16 +325,19 @@ Authorization: Bearer <token>
 **请求路径**：`/rooms`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **查询参数**：
+
 ```
 ?page=1&limit=10&status=available&type=standard
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -350,9 +383,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ### 2. 获取房间详情
 
@@ -363,11 +397,13 @@ Authorization: Bearer <token>
 **请求路径**：`/rooms/:room_id`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -393,10 +429,11 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `404` - 房间不存在
 
----
+***
 
 ### 3. 创建房间
 
@@ -407,12 +444,14 @@ Authorization: Bearer <token>
 **请求路径**：`/rooms`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "room_number": "103",
@@ -429,6 +468,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -452,11 +492,12 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `400` - 请求参数错误
 - `409` - 房间号已存在
 
----
+***
 
 ### 4. 更新房间信息
 
@@ -467,12 +508,14 @@ Authorization: Bearer <token>
 **请求路径**：`/rooms/:room_id`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "room_price": 329.00,
@@ -482,6 +525,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -497,11 +541,12 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `404` - 房间不存在
 - `400` - 请求参数错误
 
----
+***
 
 ### 5. 删除房间
 
@@ -512,11 +557,13 @@ Authorization: Bearer <token>
 **请求路径**：`/rooms/:room_id`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -526,11 +573,12 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `404` - 房间不存在
 - `400` - 房间有未完成订单，不能删除
 
----
+***
 
 ### 6. 更新房间状态
 
@@ -541,12 +589,14 @@ Authorization: Bearer <token>
 **请求路径**：`/rooms/:room_id/status`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "status": "occupied",
@@ -556,6 +606,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -569,11 +620,12 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `404` - 房间不存在
 - `400` - 请求参数错误
 
----
+***
 
 ### 7. 批量更新房间状态
 
@@ -584,12 +636,14 @@ Authorization: Bearer <token>
 **请求路径**：`/rooms/batch/status`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "room_ids": [1, 2, 3, 4, 5],
@@ -599,6 +653,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -611,10 +666,11 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `400` - 请求参数错误
 
----
+***
 
 ## 📅 预订管理接口
 
@@ -627,12 +683,14 @@ Authorization: Bearer <token>
 **请求路径**：`/bookings`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "room_id": 1,
@@ -648,6 +706,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -675,11 +734,12 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `400` - 请求参数错误
 - `409` - 房间已被预订
 
----
+***
 
 ### 2. 获取预订列表
 
@@ -690,16 +750,19 @@ Authorization: Bearer <token>
 **请求路径**：`/bookings`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **查询参数**：
+
 ```
 ?page=1&limit=10&status=confirmed&check_in_date=2024-01-20
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -743,9 +806,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ### 3. 获取预订详情
 
@@ -756,11 +820,13 @@ Authorization: Bearer <token>
 **请求路径**：`/bookings/:booking_id`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -790,10 +856,11 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `404` - 预订不存在
 
----
+***
 
 ### 4. 更新预订
 
@@ -804,12 +871,14 @@ Authorization: Bearer <token>
 **请求路径**：`/bookings/:booking_id`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "check_out_date": "2024-01-23",
@@ -818,6 +887,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -833,11 +903,12 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `404` - 预订不存在
 - `400` - 请求参数错误
 
----
+***
 
 ### 5. 取消预订
 
@@ -848,11 +919,13 @@ Authorization: Bearer <token>
 **请求路径**：`/bookings/:booking_id`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -866,11 +939,12 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `404` - 预订不存在
 - `400` - 预订已入住，不能取消
 
----
+***
 
 ### 6. 入住登记
 
@@ -881,11 +955,13 @@ Authorization: Bearer <token>
 **请求路径**：`/bookings/:booking_id/check-in`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -900,11 +976,12 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `404` - 预订不存在
 - `400` - 预订未确认或已入住
 
----
+***
 
 ### 7. 退房结账
 
@@ -915,12 +992,14 @@ Authorization: Bearer <token>
 **请求路径**：`/bookings/:booking_id/check-out`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "extra_charges": 50.00,
@@ -929,6 +1008,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -946,11 +1026,12 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `404` - 预订不存在
 - `400` - 预订未入住或已退房
 
----
+***
 
 ## 💳 支付管理接口
 
@@ -963,12 +1044,14 @@ Authorization: Bearer <token>
 **请求路径**：`/payments`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "order_type": "booking",
@@ -980,6 +1063,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1000,10 +1084,11 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `400` - 请求参数错误
 
----
+***
 
 ### 2. 查询支付订单
 
@@ -1014,11 +1099,13 @@ Authorization: Bearer <token>
 **请求路径**：`/payments/:payment_id`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1040,10 +1127,11 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `404` - 支付订单不存在
 
----
+***
 
 ### 3. 微信支付回调
 
@@ -1054,11 +1142,13 @@ Authorization: Bearer <token>
 **请求路径**：`/payments/wechat/callback`
 
 **请求头**：
+
 ```
 Content-Type: application/xml
 ```
 
 **请求体**：
+
 ```xml
 <xml>
   <appid><![CDATA[wx1234567890abcdef]]></appid>
@@ -1079,6 +1169,7 @@ Content-Type: application/xml
 ```
 
 **响应示例**：
+
 ```xml
 <xml>
   <return_code><![CDATA[SUCCESS]]></return_code>
@@ -1087,11 +1178,12 @@ Content-Type: application/xml
 ```
 
 **错误码**：
+
 - `400` - 签名验证失败
 - `400` - 订单不存在
 - `400` - 订单已支付
 
----
+***
 
 ### 4. 支付宝支付回调
 
@@ -1102,26 +1194,30 @@ Content-Type: application/xml
 **请求路径**：`/payments/alipay/callback`
 
 **请求头**：
+
 ```
 Content-Type: application/x-www-form-urlencoded
 ```
 
 **请求体**：
+
 ```
 app_id=2021000123456789&charset=utf-8&method=alipay.trade.app.pay.return&format=json&sign=xxx&...
 ```
 
 **响应示例**：
+
 ```
 success
 ```
 
 **错误码**：
+
 - `400` - 签名验证失败
 - `400` - 订单不存在
 - `400` - 订单已支付
 
----
+***
 
 ## 👥 会员管理接口
 
@@ -1134,11 +1230,13 @@ success
 **请求路径**：`/members/register`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 ```
 
 **请求体**：
+
 ```json
 {
   "phone": "13800138000",
@@ -1149,6 +1247,7 @@ Content-Type: application/json
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1167,10 +1266,11 @@ Content-Type: application/json
 ```
 
 **错误码**：
+
 - `400` - 手机号已注册
 - `400` - 请求参数错误
 
----
+***
 
 ### 2. 会员登录
 
@@ -1181,11 +1281,13 @@ Content-Type: application/json
 **请求路径**：`/members/login`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 ```
 
 **请求体**：
+
 ```json
 {
   "phone": "13800138000",
@@ -1194,6 +1296,7 @@ Content-Type: application/json
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1214,10 +1317,11 @@ Content-Type: application/json
 ```
 
 **错误码**：
+
 - `401` - 手机号或密码错误
 - `404` - 会员不存在
 
----
+***
 
 ### 3. 获取会员信息
 
@@ -1228,11 +1332,13 @@ Content-Type: application/json
 **请求路径**：`/members/profile`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1254,9 +1360,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ### 4. 升级会员等级
 
@@ -1267,12 +1374,14 @@ Authorization: Bearer <token>
 **请求路径**：`/members/upgrade`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "upgrade_type": "payment",
@@ -1281,6 +1390,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1296,10 +1406,11 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `400` - 不满足升级条件
 
----
+***
 
 ### 5. 积分兑换
 
@@ -1310,12 +1421,14 @@ Authorization: Bearer <token>
 **请求路径**：`/members/exchange-points`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "exchange_type": "cash",
@@ -1325,6 +1438,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1340,10 +1454,11 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `400` - 积分不足
 
----
+***
 
 ## 🎫 优惠券管理接口
 
@@ -1356,12 +1471,14 @@ Authorization: Bearer <token>
 **请求路径**：`/coupons/receive`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "coupon_id": 1
@@ -1369,6 +1486,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1389,11 +1507,12 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `400` - 优惠券已领完
 - `400` - 优惠券已过期
 
----
+***
 
 ### 2. 获取会员优惠券列表
 
@@ -1404,16 +1523,19 @@ Authorization: Bearer <token>
 **请求路径**：`/coupons`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **查询参数**：
+
 ```
 ?status=unused&valid_to=2024-02-18
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1453,9 +1575,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ### 3. 使用优惠券
 
@@ -1466,12 +1589,14 @@ Authorization: Bearer <token>
 **请求路径**：`/coupons/:user_coupon_id/use`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "order_id": 1,
@@ -1480,6 +1605,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1494,11 +1620,12 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `400` - 优惠券已使用
 - `400` - 不满足使用条件
 
----
+***
 
 ## 📦 送物订单接口
 
@@ -1511,12 +1638,14 @@ Authorization: Bearer <token>
 **请求路径**：`/delivery-orders`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "room_id": 1,
@@ -1528,6 +1657,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1548,10 +1678,11 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `400` - 请求参数错误
 
----
+***
 
 ### 2. 获取送物订单列表
 
@@ -1562,16 +1693,19 @@ Authorization: Bearer <token>
 **请求路径**：`/delivery-orders`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **查询参数**：
+
 ```
 ?page=1&limit=10&status=pending&room_id=1
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1609,9 +1743,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ### 3. 更新送物订单状态
 
@@ -1622,12 +1757,14 @@ Authorization: Bearer <token>
 **请求路径**：`/delivery-orders/:order_id/status`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "status": "completed",
@@ -1636,6 +1773,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1649,11 +1787,12 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `404` - 订单不存在
 - `400` - 状态转换错误
 
----
+***
 
 ## 🔧 报修工单接口
 
@@ -1666,12 +1805,14 @@ Authorization: Bearer <token>
 **请求路径**：`/maintenance-tickets`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "room_id": 1,
@@ -1683,6 +1824,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1703,10 +1845,11 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `400` - 请求参数错误
 
----
+***
 
 ### 2. 获取报修工单列表
 
@@ -1717,16 +1860,19 @@ Authorization: Bearer <token>
 **请求路径**：`/maintenance-tickets`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **查询参数**：
+
 ```
 ?page=1&limit=10&status=pending&priority=high
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1764,9 +1910,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ### 3. 更新报修工单状态
 
@@ -1777,12 +1924,14 @@ Authorization: Bearer <token>
 **请求路径**：`/maintenance-tickets/:ticket_id/status`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "status": "completed",
@@ -1793,6 +1942,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1808,11 +1958,382 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `404` - 工单不存在
 - `400` - 状态转换错误
 
----
+***
+
+## 📞 语音通话接口
+
+### 1. 住客发起语音通话请求
+
+**接口说明**：住客发起语音通话请求（客房端）
+
+**请求方式**：`POST`
+
+**请求路径**：`/calls/initiate`
+
+**请求头**：
+```
+Content-Type: application/json
+Authorization: Bearer <token>
+```
+
+**请求体**：
+```json
+{
+  "room_id": "301",
+  "type": "voice"
+}
+```
+
+**响应示例**：
+```json
+{
+  "code": 200,
+  "message": "通话请求已发送",
+  "data": {
+    "call_id": "CALL20260404001",
+    "caller_type": "room",
+    "caller_id": "301",
+    "callee_type": "front_desk",
+    "callee_id": "FD001",
+    "status": "calling",
+    "started_at": "2026-04-04 15:30:00"
+  }
+}
+```
+
+**错误码**：
+- `401` - Token无效或已过期
+- `400` - 房间不存在
+- `400` - 通话类型错误
+- `409` - 已有通话进行中
+
+***
+
+### 2. 前台主动发起语音通话
+
+**接口说明**：前台主动呼叫指定房间（前台管理端）
+
+**请求方式**：`POST`
+
+**请求路径**：`/calls/outbound`
+
+**请求头**：
+```
+Content-Type: application/json
+Authorization: Bearer <token>
+```
+
+**请求体**：
+```json
+{
+  "room_id": "301",
+  "caller_id": "FD001",
+  "type": "voice"
+}
+```
+
+**响应示例**：
+```json
+{
+  "code": 200,
+  "message": "通话已发起",
+  "data": {
+    "call_id": "CALL20260404002",
+    "caller_type": "front_desk",
+    "caller_id": "FD001",
+    "callee_type": "room",
+    "callee_id": "301",
+    "status": "outgoing",
+    "started_at": "2026-04-04 15:30:00"
+  }
+}
+```
+
+**错误码**：
+- `401` - Token无效或已过期
+- `400` - 房间不存在
+- `400` - 员工ID不存在
+- `409` - 房间已有呼出进行中
+
+***
+
+### 3. 接听语音通话
+
+**接口说明**：接听语音通话（任一方）
+
+**请求方式**：`POST`
+
+**请求路径**：`/calls/:call_id/answer`
+
+**请求头**：
+```
+Content-Type: application/json
+Authorization: Bearer <token>
+```
+
+**响应示例**：
+```json
+{
+  "code": 200,
+  "message": "通话已接听",
+  "data": {
+    "call_id": "CALL20260404001",
+    "status": "connected",
+    "answered_at": "2026-04-04 15:30:05"
+  }
+}
+```
+
+**错误码**：
+- `401` - Token无效或已过期
+- `404` - 通话不存在
+- `409` - 通话已结束或已拒接
+
+***
+
+### 4. 拒接语音通话
+
+**接口说明**：拒接语音通话（被叫方）
+
+**请求方式**：`POST`
+
+**请求路径**：`/calls/:call_id/reject`
+
+**请求头**：
+```
+Content-Type: application/json
+Authorization: Bearer <token>
+```
+
+**响应示例**：
+```json
+{
+  "code": 200,
+  "message": "通话已拒接",
+  "data": {
+    "call_id": "CALL20260404001",
+    "status": "rejected",
+    "ended_at": "2026-04-04 15:30:10"
+  }
+}
+```
+
+**错误码**：
+- `401` - Token无效或已过期
+- `404` - 通话不存在
+- `409` - 通话已结束
+
+***
+
+### 5. 挂断语音通话
+
+**接口说明**：挂断语音通话（任一方）
+
+**请求方式**：`POST`
+
+**请求路径**：`/calls/:call_id/hangup`
+
+**请求头**：
+```
+Content-Type: application/json
+Authorization: Bearer <token>
+```
+
+**响应示例**：
+```json
+{
+  "code": 200,
+  "message": "通话已挂断",
+  "data": {
+    "call_id": "CALL20260404001",
+    "status": "ended",
+    "ended_at": "2026-04-04 15:35:00",
+    "duration_sec": 300
+  }
+}
+```
+
+**错误码**：
+- `401` - Token无效或已过期
+- `404` - 通话不存在
+- `409` - 通话已结束
+
+***
+
+### 6. 查询通话状态
+
+**接口说明**：查询通话状态
+
+**请求方式**：`GET`
+
+**请求路径**：`/calls/:call_id/status`
+
+**请求头**：
+```
+Authorization: Bearer <token>
+```
+
+**响应示例**：
+```json
+{
+  "code": 200,
+  "message": "查询成功",
+  "data": {
+    "call_id": "CALL20260404001",
+    "caller_type": "room",
+    "caller_id": "301",
+    "callee_type": "front_desk",
+    "callee_id": "FD001",
+    "status": "connected",
+    "started_at": "2026-04-04 15:30:00",
+    "answered_at": "2026-04-04 15:30:05",
+    "duration_sec": 300,
+    "ended_at": null
+  }
+}
+```
+
+**错误码**：
+- `401` - Token无效或已过期
+- `404` - 通话不存在
+
+***
+
+### 7. 获取当前活跃通话列表
+
+**接口说明**：获取当前活跃通话列表
+
+**请求方式**：`GET`
+
+**请求路径**：`/calls/active`
+
+**请求头**：
+```
+Authorization: Bearer <token>
+```
+
+**响应示例**：
+```json
+{
+  "code": 200,
+  "message": "查询成功",
+  "data": {
+    "items": [
+      {
+        "call_id": "CALL20260404001",
+        "caller_type": "room",
+        "caller_id": "301",
+        "callee_type": "front_desk",
+        "callee_id": "FD001",
+        "status": "connected",
+        "started_at": "2026-04-04 15:30:00",
+        "answered_at": "2026-04-04 15:30:05",
+        "duration_sec": 300
+      }
+    ]
+  }
+}
+```
+
+**错误码**：
+- `401` - Token无效或已过期
+
+***
+
+### 8. 获取通话记录
+
+**接口说明**：获取通话记录（分页查询）
+
+**请求方式**：`GET`
+
+**请求路径**：`/calls/history`
+
+**请求头**：
+```
+Authorization: Bearer <token>
+```
+
+**查询参数**：
+```
+?page=1&limit=10&room_id=301&start_time=2026-04-01&end_time=2026-04-30
+```
+
+**响应示例**：
+```json
+{
+  "code": 200,
+  "message": "查询成功",
+  "data": {
+    "total": 10,
+    "page": 1,
+    "limit": 10,
+    "items": [
+      {
+        "call_id": "CALL20260404001",
+        "caller_type": "room",
+        "caller_id": "301",
+        "callee_type": "front_desk",
+        "callee_id": "FD001",
+        "status": "ended",
+        "started_at": "2026-04-04 15:30:00",
+        "answered_at": "2026-04-04 15:30:05",
+        "ended_at": "2026-04-04 15:35:00",
+        "duration_sec": 300
+      }
+    ]
+  }
+}
+```
+
+**错误码**：
+- `401` - Token无效或已过期
+
+***
+
+### 9. 获取通话统计
+
+**接口说明**：获取通话统计（时长/次数/接听率）
+
+**请求方式**：`GET`
+
+**请求路径**：`/calls/stats`
+
+**请求头**：
+```
+Authorization: Bearer <token>
+```
+
+**查询参数**：
+```
+?start_time=2026-04-01&end_time=2026-04-30&room_id=301
+```
+
+**响应示例**：
+```json
+{
+  "code": 200,
+  "message": "查询成功",
+  "data": {
+    "total_calls": 50,
+    "total_duration_sec": 15000,
+    "answered_calls": 45,
+    "missed_calls": 3,
+    "rejected_calls": 2,
+    "avg_duration_sec": 300,
+    "answer_rate": 0.9
+  }
+}
+```
+
+**错误码**：
+- `401` - Token无效或已过期
+
+***
 
 ## 📊 服务评价接口
 
@@ -1825,12 +2346,14 @@ Authorization: Bearer <token>
 **请求路径**：`/reviews`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "order_id": 1,
@@ -1842,6 +2365,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1859,11 +2383,12 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `400` - 订单已评价
 - `400` - 请求参数错误
 
----
+***
 
 ### 2. 获取房间评价列表
 
@@ -1874,16 +2399,19 @@ Authorization: Bearer <token>
 **请求路径**：`/rooms/:room_id/reviews`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **查询参数**：
+
 ```
 ?page=1&limit=10&score=5
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1916,9 +2444,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ## 📱 用户管理接口
 
@@ -1931,11 +2460,13 @@ Authorization: Bearer <token>
 **请求路径**：`/users/profile`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1953,9 +2484,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ### 2. 更新用户信息
 
@@ -1966,12 +2498,14 @@ Authorization: Bearer <token>
 **请求路径**：`/users/profile`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "email": "newemail@example.com"
@@ -1979,6 +2513,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -1995,10 +2530,11 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `400` - 请求参数错误
 
----
+***
 
 ### 3. 修改密码
 
@@ -2009,12 +2545,14 @@ Authorization: Bearer <token>
 **请求路径**：`/users/password`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "old_password": "password123",
@@ -2023,6 +2561,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -2032,11 +2571,12 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `400` - 旧密码错误
 - `400` - 新密码不符合要求
 
----
+***
 
 ## 📡 设备管理接口
 
@@ -2049,16 +2589,19 @@ Authorization: Bearer <token>
 **请求路径**：`/devices`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **查询参数**：
+
 ```
 ?page=1&limit=10&type=main
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -2107,9 +2650,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ### 2. 获取设备详情
 
@@ -2120,11 +2664,13 @@ Authorization: Bearer <token>
 **请求路径**：`/devices/:id`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -2145,10 +2691,11 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `404` - 设备不存在
 
----
+***
 
 ### 3. 控制设备
 
@@ -2159,12 +2706,14 @@ Authorization: Bearer <token>
 **请求路径**：`/devices/:id/control`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
 **请求体**：
+
 ```json
 {
   "command_type": "light_on",
@@ -2173,6 +2722,7 @@ Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -2191,11 +2741,12 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `404` - 设备不存在
 - `400` - 请求参数错误
 
----
+***
 
 ### 4. 注册设备
 
@@ -2206,11 +2757,13 @@ Authorization: Bearer <token>
 **请求路径**：`/devices/register`
 
 **请求头**：
+
 ```
 Content-Type: application/json
 ```
 
 **请求体**：
+
 ```json
 {
   "device_id": "MAIN001",
@@ -2222,6 +2775,7 @@ Content-Type: application/json
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -2240,10 +2794,11 @@ Content-Type: application/json
 ```
 
 **错误码**：
+
 - `400` - 设备ID已存在
 - `400` - 请求参数错误
 
----
+***
 
 ### 5. 删除设备
 
@@ -2254,11 +2809,13 @@ Content-Type: application/json
 **请求路径**：`/devices/:id`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -2268,10 +2825,11 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 - `404` - 设备不存在
 
----
+***
 
 ## 📊 传感器数据接口
 
@@ -2284,16 +2842,19 @@ Authorization: Bearer <token>
 **请求路径**：`/sensors/data`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **查询参数**：
+
 ```
 ?device_id=SUB1001&sensor_type=temperature&start_time=2024-01-18%2000:00:00&end_time=2024-01-18%2023:59:59&page=1&limit=100
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -2323,9 +2884,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ### 2. 获取最新传感器数据
 
@@ -2336,16 +2898,19 @@ Authorization: Bearer <token>
 **请求路径**：`/sensors/data/latest`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **查询参数**：
+
 ```
 ?device_id=SUB1001
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -2369,9 +2934,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ### 3. 获取传感器历史数据
 
@@ -2382,16 +2948,19 @@ Authorization: Bearer <token>
 **请求路径**：`/sensors/data/history`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **查询参数**：
+
 ```
 ?device_id=SUB1001&sensor_type=temperature&start_time=2024-01-18%2000:00:00&end_time=2024-01-18%2023:59:59
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -2414,9 +2983,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ## 🛡️ 安防管理接口
 
@@ -2429,11 +2999,13 @@ Authorization: Bearer <token>
 **请求路径**：`/security/status`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -2454,9 +3026,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ### 2. 启动布防
 
@@ -2467,11 +3040,13 @@ Authorization: Bearer <token>
 **请求路径**：`/security/arm`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -2484,9 +3059,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ### 3. 解除布防
 
@@ -2497,11 +3073,13 @@ Authorization: Bearer <token>
 **请求路径**：`/security/disarm`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -2514,9 +3092,10 @@ Authorization: Bearer <token>
 ```
 
 **错误码**：
+
 - `401` - Token无效或已过期
 
----
+***
 
 ### 4. 获取安防事件
 
@@ -2527,16 +3106,19 @@ Authorization: Bearer <token>
 **请求路径**：`/security/events`
 
 **请求头**：
+
 ```
 Authorization: Bearer <token>
 ```
 
 **查询参数**：
+
 ```
 ?page=1&limit=10&level=critical
 ```
 
 **响应示例**：
+
 ```json
 {
   "code": 200,
@@ -2551,3 +3133,5 @@ Authorization: Bearer <token>
         "device_id": "SUB2001",
         "event_type": "intrusion",
         "event_data": {"sensor": "motion", "location": "living
+```
+
